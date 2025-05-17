@@ -1,0 +1,40 @@
+@page
+@model StatsHub_Web.Pages.DailyStatsModel
+@{
+    ViewData["Title"] = "Ежедневная статистика";
+}
+
+<h1>Ежедневная выручка</h1>
+<canvas id="revenueChart"></canvas>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        fetch('http://localhost:5000/orders/daily-stats')
+            .then(response => response.json())
+            .then(data => {
+                const labels = data.map(item => item.date);
+                const revenues = data.map(item => item.revenue);
+
+                const ctx = document.getElementById('revenueChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Выручка',
+                            data: revenues,
+                            borderColor: 'blue',
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            })
+            .catch(error => console.error('Ошибка:', error));
+    </script>
+}
