@@ -26,15 +26,26 @@ public class Program
                 options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
             });
 
-        if (!builder.Environment.IsEnvironment("Testing"))
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("AllowWeb", policy =>
+            {
+                policy.WithOrigins("http://localhost:8081")
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+
+        bool isNotTesting = !builder.Environment.IsEnvironment("Testing");
+        if (isNotTesting)
         {
             builder.Services.AddDbContext<StatsHubContext>(options =>
                 options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+            builder.Services.AddScoped<DatabaseMigrator>();
         }
 
         builder.Services.AddMemoryCache();
         builder.Services.AddScoped<OrderService>();
-
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen(c =>
         {
@@ -51,8 +62,18 @@ public class Program
 
         app.UseSerilogRequestLogging();
         app.UseHttpsRedirection();
+
+        app.UseCors("AllowWeb");
+
         app.UseAuthorization();
         app.MapControllers();
+
+        if (isNotTesting)
+        {
+            using var scope = app.Services.CreateScope();
+            var migrator = scope.ServiceProvider.GetRequiredService<DatabaseMigrator>();
+            migrator.ApplyMigrations();
+        }
 
         app.Run();
     }

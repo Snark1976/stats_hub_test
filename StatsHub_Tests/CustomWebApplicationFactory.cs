@@ -9,7 +9,7 @@ namespace StatsHub.Tests;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
-    private readonly string _databaseName = $"StatsHubTestDb_{Guid.NewGuid()}"; // фиксирован для этого factory
+    private readonly string _databaseName = $"StatsHubTestDb_{Guid.NewGuid()}";
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -28,7 +28,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             }
 
             services.AddDbContext<StatsHubContext>(options =>
-                options.UseInMemoryDatabase(_databaseName)); // 💡 один на весь factory
+                options.UseInMemoryDatabase(_databaseName));
 
             var sp = services.BuildServiceProvider();
             using var scope = sp.CreateScope();

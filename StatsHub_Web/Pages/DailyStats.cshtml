@@ -10,8 +10,14 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        fetch('http://localhost:5000/orders/daily-stats')
-            .then(response => response.json())
+        const apiUrl = '@Model.ApiUrl/orders/daily-stats';
+        fetch(apiUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка при загрузке данных: ' + response.statusText);
+                }
+                return response.json();
+            })
             .then(data => {
                 const labels = data.map(item => item.date);
                 const revenues = data.map(item => item.revenue);
@@ -35,6 +41,9 @@
                     }
                 });
             })
-            .catch(error => console.error('Ошибка:', error));
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Не удалось загрузить данные. Попробуйте позже.');
+            });
     </script>
 }

@@ -59,13 +59,12 @@ public class OrderService
             .GroupBy(o => o.CreatedAt.Date)
             .Select(g => new
             {
-                Date = g.Key,  // DateTime
+                Date = g.Key,
                 Revenue = g.Sum(o => o.Price * o.Quantity)
             })
             .OrderBy(x => x.Date)
             .ToListAsync();
 
-        // форматируем дату уже в памяти
         return stats
             .Select(x => new
             {

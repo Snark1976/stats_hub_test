@@ -15,10 +15,7 @@ FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
 RUN dotnet publish "StatsHub_Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS final
+FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-EXPOSE 8080
-RUN dotnet tool install --global dotnet-ef
-ENV PATH="$PATH:/root/.dotnet/tools"
 ENTRYPOINT ["dotnet", "StatsHub_Api.dll"]
